@@ -1,0 +1,8 @@
+env/
+.vscode/
+__pycache__/
+*/__pycache__/
+token.txt
+data/users.db
+data/images
+nohup.out
