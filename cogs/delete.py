@@ -1,10 +1,4 @@
-import random
-import os
-from data import db
-import discord
-from discord.ext import commands
-
-class Fossil(commands.Cog):
+class Delete(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
 

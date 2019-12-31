@@ -1,58 +1,66 @@
 import sqlite3
+usersdb = sqlite3.connect('data/users.db')
+sessionsdb = sqlite3.connect('data/sessions.db')
 
-def init():
-    conn = sqlite3.connect("data.db")
-    cursor = conn.execute("CREATE TABLE Users (UserID TEXT, Fossil TEXT, Score TEXT)")
+def usersinit():
+    cursor = usersdb.execute("CREATE TABLE Users (UserID TEXT, Fossil TEXT, Score INTEGER)")
+
+def sessionsdb():
+    cursor = sessions.execute("CREATE TABLE Sessions (SessionID TEXT, Fossil TEXT, Score INTEGER)")
 
 def readplaintext(userid):
-    conn = sqlite3.connect('data/users.db')
     try:
-        cursor = conn.execute("SELECT * FROM Users WHERE USERID = ?", (userid,))
+        cursor = usersdb.execute("SELECT * FROM Users WHERE UserID = ?", (userid,))
         for row in cursor:
             return row[1]
     except sqlite3.OperationalError:
-        init()
+        usersinit()
         readplaintext(userid)
 
-def writeplaintext(userid,plaintext):
-    conn = sqlite3.connect('data/users.db')
+def writefossil(userid,fossil):
     try:
-        cursor = conn.execute("SELECT * FROM Users WHERE USERID = ?", (userid,))
+        cursor = usersdb.execute("SELECT * FROM Users WHERE UserID = ?", (userid,))
         if(cursor.fetchone != None):
-            conn.execute("UPDATE Users SET PLAINTEXT = ? WHERE USERID = ?", (plaintext, userid))
+            usersdb.execute("UPDATE Users SET Fossil = ? WHERE UserID = ?", (fossil, userid))
         if(cursor.fetchone() == None):
-            conn.execute("INSERT INTO Users (USERID,PLAINTEXT,SCORE) VALUES (?, ?, ?);", (userid, plaintext, 0))
+            usersdb.execute("INSERT INTO Users (UserID,Fossil,Score) VALUES (?, ?, ?);", (userid, fossil, 0))
         
-        conn.commit()
+        usersdb.commit()
     except sqlite3.OperationalError:
-        init()
-        writeplaintext(userid,plaintext)
+        usersinit()
+        writefossil(userid,fossil)
 
 def changescore(userid,increment):
-    conn = sqlite3.connect('data/users.db')
-
     try:
-        cursor = conn.execute("SELECT * FROM Users WHERE USERID = ?", (userid,))
+        cursor = usersdb.execute("SELECT * FROM Users WHERE UserID = ?", (userid,))
         for row in cursor:
             score = row[2]
         
         score += increment
-        conn.execute("UPDATE Users SET SCORE = ? WHERE USERID = ?", (score, userid))
-        conn.commit()
+        usersdb.execute("UPDATE Users SET Score = ? WHERE UserID = ?", (score, userid))
+        usersdb.commit()
     except sqlite3.OperationalError:
-        init()
+        usersinit()
         changescore(userid,increment)
 
 def readallscores():
     scores = []
-    conn = sqlite3.connect('data/users.db')
 
     try:
-        cursor = conn.execute("SELECT * FROM Users")
+        cursor = usersdb.execute("SELECT * FROM Users")
         for row in cursor:
             scores.append([row[0],row[2]])
         
         return scores
     except sqlite3.OperationalError:
-        init()
+        usersinit()
         readallscores()
+
+def changeMode(userid,mode):
+    try:
+        cursor = usersdb.execute("SELECT * FROM Users WHERE UserID = ?", (userid,))
+        usersdb.execute("UPDATE Users SET Mode = ? WHERE UserID = ?", (mode, userid))
+        usersdb.commit()
+    except sqlite3.OperationalError:
+        usersinit()
+        changescore(userid,mode)
